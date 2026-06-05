@@ -315,6 +315,16 @@ function blogFetch(){
   });
 }
 
+function blogToggleEntry(header){
+  var body = header.nextElementSibling;
+  var isOpen = body.style.display !== 'none';
+  /* collapse all */
+  var allBodies = document.querySelectorAll('#blogFeed .blog-entry-body');
+  allBodies.forEach(function(b){ b.style.display='none'; });
+  /* open clicked if it was closed */
+  if(!isOpen) body.style.display='block';
+}
+
 function blogRenderEntries(entries){
   var feed  = document.getElementById('blogFeed');
   var empty = document.getElementById('blogEmpty');
@@ -329,7 +339,8 @@ function blogRenderEntries(entries){
     var div=document.createElement('div');
     div.className='blog-entry';
     var delBtn='<span class="blog-delete" onclick="blogDelete('+ri+')" style="display:'+(blogAuthed?'inline':'none')+'">delete</span>';
-    div.innerHTML='<div class="blog-entry-header"><span class="blog-entry-title">'+st+'</span><span class="blog-entry-date">'+e.date+'</span>'+delBtn+'</div><div class="blog-entry-body">'+sb+'</div>';
+    var bodyDisplay = i===0 ? 'block' : 'none';
+    div.innerHTML='<div class="blog-entry-header" onclick="blogToggleEntry(this)" style="cursor:pointer;"><span class="blog-entry-title">'+st+'</span><span class="blog-entry-date">'+e.date+'</span>'+delBtn+'</div><div class="blog-entry-body" style="display:'+bodyDisplay+'">'+sb+'</div>';
     feed.appendChild(div);
   }
 }
