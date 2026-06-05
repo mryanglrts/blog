@@ -1285,7 +1285,7 @@ body {
   <div style="padding:14px;background:linear-gradient(160deg,#eae6da,#f0ece0);min-height:300px;">
 
     <!-- SETUP BANNER — shown until API key is set -->
-    <div id="blogSetup" style="display:none;background:var(--yellow);border:1px solid var(--sage2);padding:10px 14px;margin-bottom:10px;font-size:12px;line-height:1.8;">
+    <div id="blogSetup" style="display:none;visibility:hidden;background:var(--yellow);border:1px solid var(--sage2);padding:10px 14px;margin-bottom:10px;font-size:12px;line-height:1.8;">
       <div style="font-family:'VT323',monospace;font-size:16px;color:var(--sage-dk);margin-bottom:4px;">· setup required ·</div>
       To save posts to the cloud:<br>
       1. Go to <strong>jsonbin.io</strong> → sign up free → copy your <strong>Master Key</strong><br>
@@ -1293,8 +1293,8 @@ body {
       3. Posts will save online and visitors can read them live ✦
     </div>
 
-    <!-- ADMIN BAR — lock/unlock + settings -->
-    <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;font-family:'VT323',monospace;font-size:14px;">
+    <!-- ADMIN BAR — hidden, reveal with Ctrl+Shift+W -->
+    <div id="blogAdminBar" style="display:none;align-items:center;gap:6px;margin-bottom:10px;font-family:'VT323',monospace;font-size:14px;">
       <div id="blogLockBtn" onclick="blogToggleAuth()" style="background:var(--btn);border:1px solid;border-color:var(--b-lt) var(--b-dk) var(--b-dk) var(--b-lt);padding:2px 10px;cursor:pointer;color:var(--sage-dk);" title="writer login">· lock ·</div>
       <div id="blogSettingsBtn" onclick="blogShowSettings()" style="display:none;background:var(--btn);border:1px solid;border-color:var(--b-lt) var(--b-dk) var(--b-dk) var(--b-lt);padding:2px 10px;cursor:pointer;color:var(--sage-dk);">· settings ·</div>
       <div id="blogResetBtn" onclick="blogResetPassword()" style="display:none;background:var(--btn);border:1px solid;border-color:var(--b-lt) var(--b-dk) var(--b-dk) var(--b-lt);padding:2px 10px;cursor:pointer;color:var(--muted);font-family:'VT323',monospace;font-size:14px;" title="forgot password?">· reset pw ·</div>
@@ -1868,6 +1868,19 @@ function blogResetPassword(){
   blogLogout();
   document.getElementById('blogAuthStatus').textContent = '· password cleared — click lock to set a new one ·';
 }
+
+/* secret admin shortcut — Ctrl+Shift+M */
+document.addEventListener('keydown', function(e){
+  if(e.ctrlKey && e.shiftKey && e.key === 'M'){
+    e.preventDefault();
+    var bar = document.getElementById('blogAdminBar');
+    if(!bar) return;
+    bar.style.display = bar.style.display === 'none' ? 'flex' : 'none';
+    /* if hiding, also log out */
+    if(bar.style.display === 'none' && blogAuthed) blogLogout();
+  }
+});
+
 </script>
 </body>
 </html>
