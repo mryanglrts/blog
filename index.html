@@ -1323,7 +1323,7 @@ body {
       <div class="box">
         <div class="box-label">· settings</div>
         <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;font-size:12px;">
-          <label style="color:var(--muted);">JSONBin Master Key (from jsonbin.io → API Keys)</label>
+          <label style="color:var(--muted);">GitHub Personal Access Token (repo scope)</label>
           <input id="blogApiKey" type="password" placeholder="paste your master key here ···"
             style="font-family:'Nunito',sans-serif;font-size:12px;padding:4px 8px;border:1px solid var(--b-mid);background:var(--cream2);outline:none;color:var(--text);">
           <label style="color:var(--muted);">Bin ID (leave blank to create a new one automatically)</label>
@@ -1578,13 +1578,16 @@ function ytSetVol(v){
   });
 })();
 
-/* ── blog (cloud + password) ── */
-var BLOG_PASS_KEY   = 'mary_blog_pass_hash';
-var BLOG_APIKEY_KEY = 'mary_blog_apikey';
-var BLOG_BINID_KEY  = 'mary_blog_binid';
-var blogAuthed      = false;
+/* ── blog (github backend) ── */
+var BLOG_PASS_KEY  = 'mary_blog_pass_hash';
+var BLOG_TOKEN_KEY = 'mary_blog_gh_token';
+var BLOG_OWNER     = 'Mary-Angela-Retuya';   /* ← your GitHub username */
+var BLOG_REPO      = 'mary-zip';
+var BLOG_FILE      = 'posts.json';
+var BLOG_BRANCH    = 'main';
+var blogAuthed     = false;
 
-/* simple hash for password storage */
+/* simple hash */
 function blogHash(s){
   var h=0;
   for(var i=0;i<s.length;i++){ h=((h<<5)-h)+s.charCodeAt(i); h=h|0; }
@@ -1597,7 +1600,6 @@ function blogToggleAuth(){
   if(!pw) return;
   var stored = localStorage.getItem(BLOG_PASS_KEY);
   if(!stored){
-    /* first time — set the password */
     var confirm = prompt('no password set yet. re-enter to confirm:');
     if(pw !== confirm){ alert('passwords did not match.'); return; }
     localStorage.setItem(BLOG_PASS_KEY, blogHash(pw));
@@ -1610,85 +1612,74 @@ function blogToggleAuth(){
 
 function blogLogin(){
   blogAuthed = true;
-  document.getElementById('blogLockBtn').textContent   = '· logged in · (lock)';
-  document.getElementById('blogLockBtn').style.color   = 'var(--sage-dk)';
-  document.getElementById('blogWriteForm').style.display  = 'block';
+  document.getElementById('blogLockBtn').textContent = '· logged in · (lock)';
+  document.getElementById('blogWriteForm').style.display   = 'block';
   document.getElementById('blogSettingsBtn').style.display = 'inline-block';
-  document.getElementById('blogResetBtn').style.display = 'inline-block';
-  document.getElementById('blogAuthStatus').textContent = '';
-  /* show delete buttons */
+  document.getElementById('blogResetBtn').style.display    = 'inline-block';
+  document.getElementById('blogAuthStatus').textContent    = '';
   document.querySelectorAll('.blog-delete').forEach(function(el){ el.style.display='inline'; });
 }
 
 function blogLogout(){
   blogAuthed = false;
-  document.getElementById('blogLockBtn').textContent    = '· lock ·';
-  document.getElementById('blogWriteForm').style.display   = 'none';
+  document.getElementById('blogLockBtn').textContent = '· lock ·';
+  document.getElementById('blogWriteForm').style.display    = 'none';
   document.getElementById('blogSettingsBtn').style.display  = 'none';
-  document.getElementById('blogResetBtn').style.display = 'none';
+  document.getElementById('blogResetBtn').style.display     = 'none';
   document.getElementById('blogSettingsPanel').style.display= 'none';
-  document.getElementById('blogAuthStatus').textContent  = '';
-  /* hide delete buttons */
+  document.getElementById('blogAuthStatus').textContent     = '';
   document.querySelectorAll('.blog-delete').forEach(function(el){ el.style.display='none'; });
 }
 
 function blogShowSettings(){
   var panel = document.getElementById('blogSettingsPanel');
   panel.style.display = panel.style.display==='none' ? 'block' : 'none';
-  var key = localStorage.getItem(BLOG_APIKEY_KEY)||'';
-  var bin = localStorage.getItem(BLOG_BINID_KEY)||'';
-  document.getElementById('blogApiKey').value = key;
-  document.getElementById('blogBinId').value  = bin;
+  var tok = localStorage.getItem(BLOG_TOKEN_KEY)||'';
+  document.getElementById('blogApiKey').value = tok;
+  document.getElementById('blogBinId').style.display = 'none';
+  document.getElementById('blogBinId').previousElementSibling.style.display = 'none';
 }
 function blogHideSettings(){
   document.getElementById('blogSettingsPanel').style.display='none';
 }
 function blogSaveSettings(){
-  var key = document.getElementById('blogApiKey').value.trim();
-  var bin = document.getElementById('blogBinId').value.trim();
-  if(!key){ document.getElementById('blogSettingsStatus').textContent='· need an api key ·'; return; }
-  localStorage.setItem(BLOG_APIKEY_KEY, key);
-  if(bin) localStorage.setItem(BLOG_BINID_KEY, bin);
+  var tok = document.getElementById('blogApiKey').value.trim();
+  if(!tok){ document.getElementById('blogSettingsStatus').textContent='· need a github token ·'; return; }
+  localStorage.setItem(BLOG_TOKEN_KEY, tok);
   document.getElementById('blogSettingsStatus').textContent='· saved ✦';
-  document.getElementById('blogSetup').style.display='none';
-  setTimeout(function(){ document.getElementById('blogSettingsStatus').textContent=''; blogHideSettings(); blogFetch(); },1200);
+  setTimeout(function(){ document.getElementById('blogSettingsStatus').textContent=''; blogHideSettings(); },1200);
 }
 
-/* JSONBin helpers */
-function blogApiKey(){ return localStorage.getItem(BLOG_APIKEY_KEY)||''; }
-function blogBinId(){  return localStorage.getItem(BLOG_BINID_KEY)||''; }
+function blogToken(){ return localStorage.getItem(BLOG_TOKEN_KEY)||''; }
 
+/* GitHub API — read posts.json */
 function blogFetch(){
-  var key = blogApiKey();
-  var bin = blogBinId();
   document.getElementById('blogLoading').style.display='block';
   document.getElementById('blogFeed').innerHTML='';
   document.getElementById('blogEmpty').style.display='none';
 
-  if(!key){
-    document.getElementById('blogLoading').style.display='none';
-    document.getElementById('blogSetup').style.display='block';
-    return;
-  }
-  if(!bin){
-    /* no bin yet — show empty */
-    document.getElementById('blogLoading').style.display='none';
-    document.getElementById('blogEmpty').style.display='block';
-    return;
-  }
-  fetch('https://api.jsonbin.io/v3/b/'+bin+'/latest',{
-    headers:{'X-Master-Key':key,'X-Bin-Meta':'false'}
+  var url = 'https://api.github.com/repos/'+BLOG_OWNER+'/'+BLOG_REPO+'/contents/'+BLOG_FILE+'?ref='+BLOG_BRANCH+'&t='+Date.now();
+  var headers = {'Accept':'application/vnd.github.v3+json'};
+  var tok = blogToken();
+  if(tok) headers['Authorization'] = 'token '+tok;
+
+  fetch(url, {headers:headers})
+  .then(function(r){
+    if(r.status===404){ return []; }
+    if(!r.ok) throw new Error('status '+r.status);
+    return r.json().then(function(d){
+      var content = atob(d.content.split('\n').join(''));
+      return JSON.parse(content);
+    });
   })
-  .then(function(r){ return r.json(); })
-  .then(function(data){
+  .then(function(entries){
     document.getElementById('blogLoading').style.display='none';
-    var entries = Array.isArray(data) ? data : [];
-    blogRenderEntries(entries);
+    blogRenderEntries(Array.isArray(entries)?entries:[]);
   })
   .catch(function(){
     document.getElementById('blogLoading').style.display='none';
     document.getElementById('blogEmpty').style.display='block';
-    document.getElementById('blogEmpty').textContent='· could not load posts · check your api key ·';
+    document.getElementById('blogEmpty').textContent='· nothing here yet ·';
   });
 }
 
@@ -1711,163 +1702,88 @@ function blogRenderEntries(entries){
   }
 }
 
-function blogSaveToBin(entries, onDone){
-  var key = blogApiKey();
-  var bin = blogBinId();
-  var statusEl = document.getElementById('blogPostStatus');
-  statusEl.textContent='· saving ·';
+/* GitHub API — write posts.json */
+function blogGetSHA(cb){
+  var url = 'https://api.github.com/repos/'+BLOG_OWNER+'/'+BLOG_REPO+'/contents/'+BLOG_FILE;
+  fetch(url,{headers:{'Authorization':'token '+blogToken(),'Accept':'application/vnd.github.v3+json'}})
+  .then(function(r){ return r.ok ? r.json() : null; })
+  .then(function(d){ cb(d?d.sha:null); })
+  .catch(function(){ cb(null); });
+}
 
-  if(!bin){
-    /* create new bin */
-    fetch('https://api.jsonbin.io/v3/b',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','X-Master-Key':key,'X-Bin-Name':'mary-blog','X-Collection-Id':''},
-      body:JSON.stringify(entries)
-    })
-    .then(function(r){ return r.json(); })
-    .then(function(data){
-      if(data.metadata && data.metadata.id){
-        localStorage.setItem(BLOG_BINID_KEY, data.metadata.id);
-        document.getElementById('blogBinId').value = data.metadata.id;
-        statusEl.textContent='· posted ✦';
-        setTimeout(function(){ statusEl.textContent=''; },2000);
-        if(onDone) onDone();
-      }
-    })
-    .catch(function(){ statusEl.textContent='· save failed · check api key ·'; });
-  } else {
-    /* update existing bin */
-    fetch('https://api.jsonbin.io/v3/b/'+bin,{
+function blogWriteEntries(entries, statusEl, onDone){
+  statusEl.textContent='· saving ·';
+  blogGetSHA(function(sha){
+    var content = btoa(unescape(encodeURIComponent(JSON.stringify(entries, null, 2))));
+    var body = {message:'update blog posts', content:content, branch:BLOG_BRANCH};
+    if(sha) body.sha = sha;
+    fetch('https://api.github.com/repos/'+BLOG_OWNER+'/'+BLOG_REPO+'/contents/'+BLOG_FILE,{
       method:'PUT',
-      headers:{'Content-Type':'application/json','X-Master-Key':key},
-      body:JSON.stringify(entries)
+      headers:{'Authorization':'token '+blogToken(),'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
+      body:JSON.stringify(body)
     })
-    .then(function(){ statusEl.textContent='· posted ✦'; setTimeout(function(){ statusEl.textContent=''; },2000); if(onDone) onDone(); })
-    .catch(function(){ statusEl.textContent='· save failed ·'; });
-  }
+    .then(function(r){
+      if(!r.ok) throw new Error();
+      statusEl.textContent='· posted ✦';
+      setTimeout(function(){ statusEl.textContent=''; },2000);
+      if(onDone) onDone();
+    })
+    .catch(function(){ statusEl.textContent='· save failed · check your token ·'; });
+  });
 }
 
 function blogPost(){
   if(!blogAuthed) return;
-  var title=document.getElementById('blogTitle').value.trim();
-  var body=document.getElementById('blogBody').value.trim();
+  var title = document.getElementById('blogTitle').value.trim();
+  var body  = document.getElementById('blogBody').value.trim();
   if(!body){ document.getElementById('blogPostStatus').textContent='· write something first ·'; return; }
-  var now=new Date();
-  var date=now.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+' · '+now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-  /* fetch current entries first then append */
-  var key=blogApiKey(); var bin=blogBinId();
-  function doPost(existing){
-    existing.push({title:title,body:body,date:date});
-    blogSaveToBin(existing,function(){
+  if(!blogToken()){ document.getElementById('blogPostStatus').textContent='· add your github token in settings first ·'; return; }
+  var now  = new Date();
+  var date = now.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+' · '+now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  /* fetch current, append, save */
+  var url = 'https://api.github.com/repos/'+BLOG_OWNER+'/'+BLOG_REPO+'/contents/'+BLOG_FILE;
+  fetch(url,{headers:{'Authorization':'token '+blogToken(),'Accept':'application/vnd.github.v3+json'}})
+  .then(function(r){ return r.ok?r.json():null; })
+  .then(function(d){
+    var existing = [];
+    if(d && d.content){
+      try{ existing = JSON.parse(atob(d.content.split('\\n').join(''))); }catch(e){}
+    }
+    existing.push({title:title, body:body, date:date});
+    blogWriteEntries(existing, document.getElementById('blogPostStatus'), function(){
       document.getElementById('blogTitle').value='';
       document.getElementById('blogBody').value='';
-      blogFetch();
+      setTimeout(function(){ blogFetch(); }, 2000);
     });
-  }
-  if(!bin){ doPost([]); return; }
-  fetch('https://api.jsonbin.io/v3/b/'+bin+'/latest',{headers:{'X-Master-Key':key,'X-Bin-Meta':'false'}})
-  .then(function(r){ return r.json(); })
-  .then(function(d){ doPost(Array.isArray(d)?d:[]); })
-  .catch(function(){ doPost([]); });
+  });
 }
 
 function blogDelete(i){
   if(!blogAuthed) return;
   if(!confirm('delete this entry?')) return;
-  var key=blogApiKey(); var bin=blogBinId();
-  if(!bin) return;
-  fetch('https://api.jsonbin.io/v3/b/'+bin+'/latest',{headers:{'X-Master-Key':key,'X-Bin-Meta':'false'}})
+  var url = 'https://api.github.com/repos/'+BLOG_OWNER+'/'+BLOG_REPO+'/contents/'+BLOG_FILE;
+  fetch(url,{headers:{'Authorization':'token '+blogToken(),'Accept':'application/vnd.github.v3+json'}})
   .then(function(r){ return r.json(); })
   .then(function(d){
-    var entries=Array.isArray(d)?d:[];
+    var entries = JSON.parse(atob(d.content.split('\\n').join('')));
     entries.splice(i,1);
-    blogSaveToBin(entries,function(){ blogFetch(); });
+    blogWriteEntries(entries, document.getElementById('blogAuthStatus'), function(){ blogFetch(); });
   });
 }
 
-/* load on tab open */
+function blogResetPassword(){
+  if(!confirm('clear your saved password? your posts are not affected.')) return;
+  localStorage.removeItem('mary_blog_pass_hash');
+  blogLogout();
+  document.getElementById('blogAuthStatus').textContent='· password cleared — click lock to set a new one ·';
+}
+
 var _origSetTab = setTab;
 setTab = function(id){
   _origSetTab(id);
   if(id==='blog') blogFetch();
 };
 blogFetch();
-
-/* ── tab drag to reorder ── */
-(function(){
-  var bar = document.getElementById('tabBar');
-  var dragged = null;
-
-  bar.addEventListener('dragstart', function(e){
-    dragged = e.target;
-    e.target.classList.add('dragging');
-    e.dataTransfer.effectAllowed = 'move';
-  });
-
-  bar.addEventListener('dragend', function(e){
-    e.target.classList.remove('dragging');
-    document.querySelectorAll('.tab').forEach(function(t){
-      t.classList.remove('drag-over');
-    });
-    dragged = null;
-    /* save new order to localStorage */
-    var order = [];
-    document.querySelectorAll('.tab').forEach(function(t){ order.push(t.dataset.tab); });
-    localStorage.setItem('mary_tab_order', JSON.stringify(order));
-    /* sync tabOrder array */
-    tabOrder = order;
-  });
-
-  bar.addEventListener('dragover', function(e){
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    var target = e.target.closest('.tab');
-    if(!target || target === dragged) return;
-    document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('drag-over'); });
-    target.classList.add('drag-over');
-  });
-
-  bar.addEventListener('dragleave', function(e){
-    var target = e.target.closest('.tab');
-    if(target) target.classList.remove('drag-over');
-  });
-
-  bar.addEventListener('drop', function(e){
-    e.preventDefault();
-    var target = e.target.closest('.tab');
-    if(!target || target === dragged) return;
-    target.classList.remove('drag-over');
-    /* insert dragged before or after target based on mouse position */
-    var rect = target.getBoundingClientRect();
-    var mid  = rect.left + rect.width / 2;
-    if(e.clientX < mid){
-      bar.insertBefore(dragged, target);
-    } else {
-      bar.insertBefore(dragged, target.nextSibling);
-    }
-  });
-
-  /* restore saved order on load */
-  var saved = localStorage.getItem('mary_tab_order');
-  if(saved){
-    try{
-      var order = JSON.parse(saved);
-      order.forEach(function(tabId){
-        var el = bar.querySelector('[data-tab="'+tabId+'"]');
-        if(el) bar.appendChild(el);
-      });
-      tabOrder = order;
-    } catch(e){}
-  }
-})();
-
-
-function blogResetPassword(){
-  if(!confirm('this will clear your saved password so you can set a new one. your posts are not affected. continue?')) return;
-  localStorage.removeItem('mary_blog_pass_hash');
-  blogLogout();
-  document.getElementById('blogAuthStatus').textContent = '· password cleared — click lock to set a new one ·';
-}
 
 /* secret admin shortcut — Ctrl+Shift+M */
 document.addEventListener('keydown', function(e){
