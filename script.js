@@ -250,6 +250,7 @@ function blogLogin(){
   document.getElementById('blogResetBtn').style.display    = 'inline-block';
   document.getElementById('blogAuthStatus').textContent    = '';
   document.querySelectorAll('.blog-admin-btns').forEach(function(el){ el.style.display='inline-flex'; });
+  blogSetDefaultDate();
 }
 
 function blogLogout(){
@@ -403,8 +404,9 @@ function blogPost(){
   var body  = document.getElementById('blogBody').value.trim();
   if(!body){ document.getElementById('blogPostStatus').textContent='· write something first ·'; return; }
   if(!blogToken()){ document.getElementById('blogPostStatus').textContent='· add your github token in settings first ·'; return; }
-  var now  = new Date();
-  var date = now.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+' · '+now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  var dateInput = document.getElementById('blogDate').value;
+  var dateObj = dateInput ? new Date(dateInput) : new Date();
+  var date = dateObj.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+' - '+dateObj.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
   /* fetch current, append, save */
   var url = 'https://api.github.com/repos/'+BLOG_OWNER+'/'+BLOG_REPO+'/contents/'+BLOG_FILE;
   fetch(url,{headers:{'Authorization':'token '+blogToken(),'Accept':'application/vnd.github.v3+json'}})
@@ -426,6 +428,7 @@ function blogPost(){
       document.getElementById('blogBody').value='';
       document.getElementById('blogEditIdx').value='';
       document.getElementById('blogPostBtn').textContent='· post ·';
+      blogSetDefaultDate();
       setTimeout(function(){ blogFetch(); }, 2000);
     });
   });
@@ -442,6 +445,12 @@ function blogDelete(i){
     entries.splice(i,1);
     blogWriteEntries(entries, document.getElementById('blogAuthStatus'), function(){ blogFetch(); });
   });
+}
+
+function blogSetDefaultDate(){
+  var now = new Date();
+  var local = new Date(now.getTime() - now.getTimezoneOffset()*60000).toISOString().slice(0,16);
+  document.getElementById('blogDate').value = local;
 }
 
 function blogEdit(i){
