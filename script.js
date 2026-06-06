@@ -284,6 +284,11 @@ function blogSaveSettings(){
 
 function blogToken(){ return localStorage.getItem(BLOG_TOKEN_KEY)||''; }
 
+/* decode base64 content from GitHub API (handles Unicode) */
+function blogDecodeContent(raw){
+  return decodeURIComponent(escape(atob(raw.split('\n').join(''))));
+}
+
 /* GitHub API — read posts.json */
 function blogFetch(){
   document.getElementById('blogLoading').style.display='block';
@@ -300,8 +305,7 @@ function blogFetch(){
     if(r.status===404){ return []; }
     if(!r.ok) throw new Error('status '+r.status);
     return r.json().then(function(d){
-      var content = atob(d.content.split('\n').join(''));
-      return JSON.parse(content);
+      return JSON.parse(blogDecodeContent(d.content));
     });
   })
   .then(function(entries){
@@ -338,9 +342,17 @@ function blogRenderEntries(entries){
     var st=(e.title||'· untitled ·').replace(/&/g,'&amp;').replace(/</g,'&lt;');
     var div=document.createElement('div');
     div.className='blog-entry';
-    var delBtn='<span class="blog-delete" onclick="blogDelete('+ri+')" style="display:'+(blogAuthed?'inline':'none')+'">delete</span>';
+    var adminBtns='<span class="blog-admin-btns" style="display:'+(blogAuthed?'inline-flex':'none')+';gap:4px;margin-left:auto;">'
+      +'<span class="blog-delete" onclick="event.stopPropagation();blogEdit('+ri+')" style="color:var(--sage-dk)">edit</span>'
+      +'<span class="blog-delete" onclick="event.stopPropagation();blogDelete('+ri+')">delete</span>'
+      +'</span>';
     var bodyDisplay = i===0 ? 'block' : 'none';
-    div.innerHTML='<div class="blog-entry-header" onclick="blogToggleEntry(this)" style="cursor:pointer;"><span class="blog-entry-title">'+st+'</span><span class="blog-entry-date">'+e.date+'</span>'+delBtn+'</div><div class="blog-entry-body" style="display:'+bodyDisplay+'">'+sb+'</div>';
+    div.innerHTML='<div class="blog-entry-header" onclick="blogToggleEntry(this)" style="cursor:pointer;">'
+      +'<span class="blog-entry-title">'+st+'</span>'
+      +'<span class="blog-entry-date">'+e.date+'</span>'
+      +adminBtns
+      +'</div>'
+      +'<div class="blog-entry-body" style="display:'+bodyDisplay+'">'+sb+'</div>';
     feed.appendChild(div);
   }
 }
@@ -397,12 +409,20 @@ function blogPost(){
   .then(function(d){
     var existing = [];
     if(d && d.content){
-      try{ existing = JSON.parse(atob(d.content.split('\\n').join(''))); }catch(e){}
+      try{ existing = JSON.parse(blogDecodeContent(d.content)); }catch(e){}
     }
-    existing.push({title:title, body:body, date:date});
+    var editIdx = parseInt(document.getElementById('blogEditIdx').value);
+    if(!isNaN(editIdx) && editIdx >= 0){
+      existing[editIdx].title = title;
+      existing[editIdx].body  = body;
+    } else {
+      existing.push({title:title, body:body, date:date});
+    }
     blogWriteEntries(existing, document.getElementById('blogPostStatus'), function(){
       document.getElementById('blogTitle').value='';
       document.getElementById('blogBody').value='';
+      document.getElementById('blogEditIdx').value='';
+      document.getElementById('blogPostBtn').textContent='· post ·';
       setTimeout(function(){ blogFetch(); }, 2000);
     });
   });
@@ -415,9 +435,25 @@ function blogDelete(i){
   fetch(url,{headers:{'Authorization':'token '+blogToken(),'Accept':'application/vnd.github.v3+json'}})
   .then(function(r){ return r.json(); })
   .then(function(d){
-    var entries = JSON.parse(atob(d.content.split('\\n').join('')));
+    var entries = JSON.parse(blogDecodeContent(d.content));
     entries.splice(i,1);
     blogWriteEntries(entries, document.getElementById('blogAuthStatus'), function(){ blogFetch(); });
+  });
+}
+
+function blogEdit(i){
+  if(!blogAuthed) return;
+  var url = 'https://api.github.com/repos/'+BLOG_OWNER+'/'+BLOG_REPO+'/contents/'+BLOG_FILE;
+  fetch(url,{headers:{'Authorization':'token '+blogToken(),'Accept':'application/vnd.github.v3+json'}})
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    var entries = JSON.parse(blogDecodeContent(d.content));
+    var e = entries[i];
+    document.getElementById('blogTitle').value = e.title||'';
+    document.getElementById('blogBody').value  = e.body||'';
+    document.getElementById('blogEditIdx').value = i;
+    document.getElementById('blogPostBtn').textContent = '· save edit ·';
+    document.getElementById('blogWriteForm').scrollIntoView({behavior:'smooth'});
   });
 }
 
