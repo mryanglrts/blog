@@ -22,6 +22,35 @@ function playClick(){
 
 const tabOrder = ['main','treasures','quests','fandom','about'];
 const paths={main:'[ home ]',treasures:'[ treasures ]',quests:'[ quest log ]',fandom:'[ fandom ]',about:'[ about ]'};
+// ── Draggable tabs ───────────────────────────────────────
+(function(){
+  var dragSrc = null;
+  document.addEventListener('DOMContentLoaded', function(){
+    var bar = document.querySelector('.tab-bar');
+    if(!bar) return;
+    bar.addEventListener('dragstart', function(e){
+      var tab = e.target.closest('[draggable]');
+      if(!tab) return;
+      dragSrc = tab;
+      setTimeout(function(){ tab.style.opacity = '0.4'; }, 0);
+    });
+    bar.addEventListener('dragend', function(e){
+      var tab = e.target.closest('[draggable]');
+      if(tab) tab.style.opacity = '';
+      dragSrc = null;
+    });
+    bar.addEventListener('dragover', function(e){
+      e.preventDefault();
+      var tab = e.target.closest('[draggable]');
+      if(!tab || tab === dragSrc) return;
+      var rect = tab.getBoundingClientRect();
+      var after = e.clientX > rect.left + rect.width / 2;
+      if(after) bar.insertBefore(dragSrc, tab.nextSibling);
+      else bar.insertBefore(dragSrc, tab);
+    });
+  });
+})();
+
 function setTab(id){
   playClick();
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===id));
