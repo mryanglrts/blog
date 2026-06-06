@@ -130,11 +130,11 @@ const D={
 };
 // ── Visitor counter ──────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function(){
-  fetch('https://api.countapi.xyz/hit/mryanglrts-blog/visitors')
+  fetch('https://api.counterapi.dev/v1/mryanglrts-blog/visits/up')
     .then(function(r){ return r.json(); })
     .then(function(d){
       var el = document.getElementById('visitorCount');
-      if(el && d.value) el.textContent = '#' + d.value.toLocaleString();
+      if(el && d.count != null) el.textContent = '#' + d.count.toLocaleString();
     })
     .catch(function(){});
 });
