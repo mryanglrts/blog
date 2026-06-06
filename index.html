@@ -246,46 +246,26 @@
         </ul>
       </div>
 
-      <!-- Scene illustration (small) -->
-      <div class="scenery-box" style="max-height:160px;" onclick="showDlg('japan')">
-        <svg viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="jsky" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%"   stop-color="#fce8f0"/>
-              <stop offset="100%" stop-color="#fdf0e0"/>
-            </linearGradient>
-          </defs>
-          <rect width="200" height="150" fill="url(#jsky)"/>
-          <!-- torii gate silhouette -->
-          <rect x="70" y="55" width="8" height="60" fill="#c83028"/>
-          <rect x="122" y="55" width="8" height="60" fill="#c83028"/>
-          <rect x="62" y="50" width="76" height="8"  rx="2" fill="#c83028"/>
-          <rect x="66" y="40" width="68" height="6"  rx="2" fill="#c83028"/>
-          <!-- torii cap curves -->
-          <path d="M62,50 Q100,42 138,50" fill="none" stroke="#c83028" stroke-width="2"/>
-          <!-- ground -->
-          <rect x="0" y="115" width="200" height="35" fill="#c8d8b0"/>
-          <!-- path -->
-          <rect x="86" y="115" width="28" height="35" fill="#d8c8a0"/>
-          <!-- cherry blossom trees -->
-          <rect x="28" y="70" width="5" height="48" fill="#8a6040"/>
-          <ellipse cx="30"  cy="64" rx="16" ry="18" fill="#f0a8b8" opacity=".85"/>
-          <ellipse cx="24"  cy="68" rx="10" ry="12" fill="#f8c0cc" opacity=".7"/>
-          <ellipse cx="38"  cy="68" rx="10" ry="12" fill="#f8c0cc" opacity=".7"/>
-          <rect x="167" y="70" width="5" height="48" fill="#8a6040"/>
-          <ellipse cx="169" cy="64" rx="16" ry="18" fill="#f0a8b8" opacity=".85"/>
-          <ellipse cx="163" cy="68" rx="10" ry="12" fill="#f8c0cc" opacity=".7"/>
-          <ellipse cx="175" cy="68" rx="10" ry="12" fill="#f8c0cc" opacity=".7"/>
-          <!-- petals falling -->
-          <ellipse cx="55"  cy="95" rx="3" ry="2" fill="#f8c0cc" opacity=".7" transform="rotate(-20,55,95)"/>
-          <ellipse cx="80"  cy="82" rx="3" ry="2" fill="#f0a8b8" opacity=".6" transform="rotate(15,80,82)"/>
-          <ellipse cx="140" cy="90" rx="3" ry="2" fill="#f8c0cc" opacity=".7" transform="rotate(-10,140,90)"/>
-          <ellipse cx="160" cy="78" rx="2" ry="1.5" fill="#f0a8b8" opacity=".6" transform="rotate(25,160,78)"/>
-          <!-- moon -->
-          <circle cx="170" cy="22" r="14" fill="#fdf8e8" opacity=".9"/>
-          <!-- label -->
-          <text x="100" y="136" text-anchor="middle" font-family="VT323,monospace" font-size="11" fill="#8a6040">dream: japan ✦</text>
-        </svg>
+      <!-- Japan photo carousel -->
+      <div class="box" style="padding:0;overflow:hidden;">
+        <div class="box-label" style="padding:5px 10px;">✦ japan 2025</div>
+        <div id="japanCarousel" style="position:relative;width:100%;aspect-ratio:4/3;background:var(--cream2);overflow:hidden;cursor:pointer;" onclick="japanCarouselOpen()">
+          <img id="japanCarouselImg" src="japan-1.jpg" alt="japan photo" style="width:100%;height:100%;object-fit:cover;display:block;">
+          <button onclick="event.stopPropagation();japanCarouselStep(-1)" style="position:absolute;left:4px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.7);border:1px solid var(--sage2);padding:2px 7px;font-family:'VT323',monospace;font-size:16px;cursor:pointer;color:var(--sage-dk);">‹</button>
+          <button onclick="event.stopPropagation();japanCarouselStep(1)"  style="position:absolute;right:4px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.7);border:1px solid var(--sage2);padding:2px 7px;font-family:'VT323',monospace;font-size:16px;cursor:pointer;color:var(--sage-dk);">›</button>
+          <div id="japanCarouselDots" style="position:absolute;bottom:5px;left:0;right:0;display:flex;justify-content:center;gap:4px;"></div>
+        </div>
+      </div>
+
+      <!-- Japan lightbox -->
+      <div id="japanLightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:10px;" onclick="japanLightboxClose()">
+        <img id="japanLightboxImg" src="" alt="japan" style="max-width:90vw;max-height:80vh;object-fit:contain;border:2px solid #fff;">
+        <div style="display:flex;gap:12px;align-items:center;">
+          <button onclick="event.stopPropagation();japanLightboxStep(-1)" style="background:rgba(255,255,255,0.15);border:1px solid #fff;color:#fff;font-family:'VT323',monospace;font-size:22px;padding:2px 12px;cursor:pointer;">‹</button>
+          <span id="japanLightboxCount" style="color:#fff;font-family:'VT323',monospace;font-size:16px;"></span>
+          <button onclick="event.stopPropagation();japanLightboxStep(1)"  style="background:rgba(255,255,255,0.15);border:1px solid #fff;color:#fff;font-family:'VT323',monospace;font-size:22px;padding:2px 12px;cursor:pointer;">›</button>
+        </div>
+        <div style="color:rgba(255,255,255,0.5);font-family:'VT323',monospace;font-size:13px;">click anywhere to close</div>
       </div>
 
       <!-- Interests cloud -->

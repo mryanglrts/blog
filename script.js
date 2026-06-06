@@ -99,6 +99,40 @@ const D={
   japan:   ["✦ japan dream","dream trip: japan at christmas.<br>currently: building the perfect itinerary one bookmark at a time.<br><br>places: kyoto shrines, akihabara, vintage camera shops, konbini at 2am."],
   stats:   ["◈ hunter stats","items rescued so far: <strong>2</strong><br>both still work perfectly.<br><br>the hunt continues ✦"],
 };
+// ── Japan photo carousel ──────────────────────────────────
+var japanPhotos = ['japan-1.jpg','japan-2.jpg','japan-3.jpg','japan-4.jpg','japan-5.jpg'];
+var japanIdx = 0;
+function japanCarouselInit(){
+  var dots = document.getElementById('japanCarouselDots');
+  if(!dots) return;
+  dots.innerHTML = '';
+  japanPhotos.forEach(function(_, i){
+    var d = document.createElement('div');
+    d.style.cssText = 'width:6px;height:6px;border-radius:50%;border:1px solid #fff;background:'+(i===0?'#fff':'transparent')+';cursor:pointer;';
+    d.onclick = function(e){ e.stopPropagation(); japanCarouselGo(i); };
+    dots.appendChild(d);
+  });
+}
+function japanCarouselGo(i){
+  japanIdx = (i + japanPhotos.length) % japanPhotos.length;
+  document.getElementById('japanCarouselImg').src = japanPhotos[japanIdx];
+  var dots = document.getElementById('japanCarouselDots');
+  if(dots) Array.from(dots.children).forEach(function(d,j){ d.style.background = j===japanIdx?'#fff':'transparent'; });
+}
+function japanCarouselStep(dir){ japanCarouselGo(japanIdx + dir); }
+function japanCarouselOpen(){
+  var lb = document.getElementById('japanLightbox');
+  lb.style.display = 'flex';
+  japanLightboxSync();
+}
+function japanLightboxSync(){
+  document.getElementById('japanLightboxImg').src = japanPhotos[japanIdx];
+  document.getElementById('japanLightboxCount').textContent = (japanIdx+1)+' / '+japanPhotos.length;
+}
+function japanLightboxStep(dir){ japanIdx = (japanIdx + dir + japanPhotos.length) % japanPhotos.length; japanCarouselGo(japanIdx); japanLightboxSync(); }
+function japanLightboxClose(){ document.getElementById('japanLightbox').style.display='none'; }
+document.addEventListener('DOMContentLoaded', japanCarouselInit);
+
 function showDlg(k){
   if(!D[k])return;
   document.getElementById('dlgTitle').textContent=D[k][0];
