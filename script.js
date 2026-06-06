@@ -95,7 +95,7 @@ const D={
   folders: ["· folders","✦ home<br>◈ treasures<br>◇ quest log<br>◇ fandom<br>✦ about<br>· blog"],
   music:   ["♩ now playing","listening to: 宇宙ネコ子 (uchu neko) on repeat<br>current fave: <em>宇宙ネコ子 — like a raspberry</em>"],
   ao3:     ["◇ ao3","i write. that's all i'll say.<br><br><em>wordcount: climbing. ao3 users understand.</em>"],
-  avatar:  ["◈ about this photo","this was taken 2 years ago! ✦<br>casio exilim mirror selfie — one of my favorite finds."],
+  avatar:  ["◈ about this photo","this was taken 2 years ago! ✦"],
   japan:   ["✦ japan dream","dream trip: japan at christmas.<br>currently: building the perfect itinerary one bookmark at a time.<br><br>places: kyoto shrines, akihabara, vintage camera shops, konbini at 2am."],
   stats:   ["◈ hunter stats","items rescued so far: <strong>2</strong><br>both still work perfectly.<br><br>the hunt continues ✦"],
 };
