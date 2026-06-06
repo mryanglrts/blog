@@ -128,6 +128,17 @@ const D={
   japan:   ["✦ japan dream","dream trip: japan at christmas.<br>currently: building the perfect itinerary one bookmark at a time.<br><br>places: kyoto shrines, akihabara, vintage camera shops, konbini at 2am."],
   stats:   ["◈ hunter stats","items rescued so far: <strong>2</strong><br>both still work perfectly.<br><br>the hunt continues ✦"],
 };
+// ── Visitor counter ──────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function(){
+  fetch('https://api.countapi.xyz/hit/mryanglrts-blog/visitors')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var el = document.getElementById('visitorCount');
+      if(el && d.value) el.textContent = '#' + d.value.toLocaleString();
+    })
+    .catch(function(){});
+});
+
 // ── Japan photo carousel ──────────────────────────────────
 var japanPhotos = ['japan-1.jpg','japan-2.jpg','japan-3.jpg','japan-4.jpg','japan-5.jpg'];
 var japanIdx = 0;
