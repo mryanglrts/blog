@@ -416,7 +416,17 @@ function blogRenderEntries(entries){
   var rev = entries.slice().reverse();
   for(var i=0;i<rev.length;i++){
     var e=rev[i]; var ri=entries.length-1-i;
-    var sb=e.body.replace(/\n/g,'<br>');
+    // pull out any images and render them as a header strip above the text
+    var rawBody = e.body.replace(/\n/g,'<br>');
+    var images = [];
+    var sb = rawBody.replace(/<img([^>]*)>/gi, function(match){
+      images.push(match); return '';
+    });
+    var imgStrip = images.length
+      ? '<div class="blog-img-strip">'+images.map(function(img){
+          return img.replace(/style="[^"]*"/i,'').replace('<img','<img style="width:100%;display:block;object-fit:cover;max-height:320px;"');
+        }).join('')+'</div>'
+      : '';
     var st=(e.title||'· untitled ·').replace(/&/g,'&amp;').replace(/</g,'&lt;');
     var div=document.createElement('div');
     div.className='blog-entry';
@@ -430,7 +440,7 @@ function blogRenderEntries(entries){
       +'<span class="blog-entry-date">'+e.date+'</span>'
       +adminBtns
       +'</div>'
-      +'<div class="blog-entry-body" style="display:'+bodyDisplay+'">'+sb+'</div>';
+      +'<div class="blog-entry-body" style="display:'+bodyDisplay+'">'+imgStrip+sb+'</div>';
     feed.appendChild(div);
   }
 }
