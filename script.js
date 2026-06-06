@@ -26,7 +26,7 @@ const paths={main:'[ home ]',treasures:'[ treasures ]',quests:'[ quest log ]',fa
 (function(){
   var dragSrc = null;
   document.addEventListener('DOMContentLoaded', function(){
-    var bar = document.querySelector('.tab-bar');
+    var bar = document.querySelector('.tabs');
     if(!bar) return;
     bar.addEventListener('dragstart', function(e){
       var tab = e.target.closest('[draggable]');
