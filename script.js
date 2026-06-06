@@ -286,7 +286,10 @@ function blogToken(){ return localStorage.getItem(BLOG_TOKEN_KEY)||''; }
 
 /* decode base64 content from GitHub API (handles Unicode) */
 function blogDecodeContent(raw){
-  return decodeURIComponent(escape(atob(raw.split('\n').join(''))));
+  var binary = atob(raw.split('\n').join(''));
+  var bytes = new Uint8Array(binary.length);
+  for(var i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
+  return new TextDecoder('utf-8').decode(bytes);
 }
 
 /* GitHub API — read posts.json */
