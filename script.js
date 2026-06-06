@@ -249,7 +249,7 @@ function blogLogin(){
   document.getElementById('blogSettingsBtn').style.display = 'inline-block';
   document.getElementById('blogResetBtn').style.display    = 'inline-block';
   document.getElementById('blogAuthStatus').textContent    = '';
-  document.querySelectorAll('.blog-delete').forEach(function(el){ el.style.display='inline'; });
+  document.querySelectorAll('.blog-admin-btns').forEach(function(el){ el.style.display='inline-flex'; });
 }
 
 function blogLogout(){
@@ -260,7 +260,7 @@ function blogLogout(){
   document.getElementById('blogResetBtn').style.display     = 'none';
   document.getElementById('blogSettingsPanel').style.display= 'none';
   document.getElementById('blogAuthStatus').textContent     = '';
-  document.querySelectorAll('.blog-delete').forEach(function(el){ el.style.display='none'; });
+  document.querySelectorAll('.blog-admin-btns').forEach(function(el){ el.style.display='none'; });
 }
 
 function blogShowSettings(){
