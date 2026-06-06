@@ -579,7 +579,10 @@ body {
 }
 .blog-entry-title { font-family: "VT323",monospace; font-size: 17px; color: var(--sage-dk); }
 .blog-entry-date  { font-size: 10.5px; color: var(--muted); font-style: italic; white-space: nowrap; }
-.blog-entry-body  { font-size: 12px; line-height: 1.8; color: var(--text); white-space: pre-wrap; }
+.blog-entry-body  { font-size: 12px; line-height: 1.8; color: var(--text); }
+.blog-entry-body ul { padding-left: 18px; margin: 4px 0; }
+.blog-entry-body li { margin: 2px 0; }
+.blog-entry-body img { max-width: 100%; margin: 6px 0; display: block; border: 1px solid var(--b-mid); }
 .blog-delete {
   font-size: 10px; color: var(--muted); cursor: pointer; margin-left: auto;
   padding: 1px 6px; border: 1px solid var(--b-mid); background: var(--chrome);

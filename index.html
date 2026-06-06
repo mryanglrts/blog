@@ -727,7 +727,13 @@
         <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">
           <input id="blogTitle" type="text" placeholder="title (optional) ···"
             style="font-family:'Nunito',sans-serif;font-size:12px;padding:4px 8px;border:1px solid var(--b-mid);background:var(--cream2);outline:none;color:var(--text);">
-          <textarea id="blogBody" rows="5" placeholder="write something today ···"
+          <div style="display:flex;gap:3px;flex-wrap:wrap;">
+            <button type="button" onclick="blogFmt('bold')"   title="Bold"   style="font-family:'Nunito',sans-serif;font-weight:700;font-size:12px;padding:2px 8px;background:var(--btn);border:1px solid;border-color:var(--b-lt) var(--b-dk) var(--b-dk) var(--b-lt);cursor:pointer;">B</button>
+            <button type="button" onclick="blogFmt('italic')" title="Italic" style="font-family:'Nunito',sans-serif;font-style:italic;font-size:12px;padding:2px 8px;background:var(--btn);border:1px solid;border-color:var(--b-lt) var(--b-dk) var(--b-dk) var(--b-lt);cursor:pointer;">I</button>
+            <button type="button" onclick="blogFmt('bullet')" title="Bullet" style="font-family:'Nunito',sans-serif;font-size:12px;padding:2px 8px;background:var(--btn);border:1px solid;border-color:var(--b-lt) var(--b-dk) var(--b-dk) var(--b-lt);cursor:pointer;">• list</button>
+            <button type="button" onclick="blogFmt('photo')"  title="Photo"  style="font-family:'Nunito',sans-serif;font-size:12px;padding:2px 8px;background:var(--btn);border:1px solid;border-color:var(--b-lt) var(--b-dk) var(--b-dk) var(--b-lt);cursor:pointer;">⊞ photo</button>
+          </div>
+          <textarea id="blogBody" rows="7" placeholder="write something today ···"
             style="font-family:'Nunito',sans-serif;font-size:12px;padding:6px 8px;border:1px solid var(--b-mid);background:var(--cream2);outline:none;resize:vertical;color:var(--text);line-height:1.7;"></textarea>
           <input id="blogDate" type="datetime-local"
             style="font-family:'Nunito',sans-serif;font-size:12px;padding:4px 8px;border:1px solid var(--b-mid);background:var(--cream2);outline:none;color:var(--text);">

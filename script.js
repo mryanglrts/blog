@@ -342,7 +342,7 @@ function blogRenderEntries(entries){
   var rev = entries.slice().reverse();
   for(var i=0;i<rev.length;i++){
     var e=rev[i]; var ri=entries.length-1-i;
-    var sb=e.body.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    var sb=e.body.replace(/\n/g,'<br>');
     var st=(e.title||'· untitled ·').replace(/&/g,'&amp;').replace(/</g,'&lt;');
     var div=document.createElement('div');
     div.className='blog-entry';
@@ -445,6 +445,28 @@ function blogDelete(i){
     entries.splice(i,1);
     blogWriteEntries(entries, document.getElementById('blogAuthStatus'), function(){ blogFetch(); });
   });
+}
+
+/* formatting toolbar */
+function blogFmt(type){
+  var ta = document.getElementById('blogBody');
+  var start = ta.selectionStart, end = ta.selectionEnd;
+  var sel = ta.value.substring(start, end);
+  var before = ta.value.substring(0, start);
+  var after  = ta.value.substring(end);
+  var insert = '';
+  if(type === 'bold')   insert = '<strong>'+(sel||'bold text')+'</strong>';
+  if(type === 'italic') insert = '<em>'+(sel||'italic text')+'</em>';
+  if(type === 'bullet') insert = '\n<ul>\n  <li>'+(sel||'item')+'</li>\n</ul>';
+  if(type === 'photo'){
+    var url = prompt('paste image URL:');
+    if(!url) return;
+    var alt = prompt('alt text (optional):') || '';
+    insert = '\n<img src="'+url+'" alt="'+alt+'" style="max-width:100%;margin:6px 0;display:block;">\n';
+  }
+  ta.value = before + insert + after;
+  ta.focus();
+  ta.selectionStart = ta.selectionEnd = before.length + insert.length;
 }
 
 function blogSetDefaultDate(){
