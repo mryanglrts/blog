@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 
 // ── Japan photo carousel ──────────────────────────────────
-var japanPhotos = ['japan-1.jpg','japan-2.jpg','japan-3.jpg','japan-4.jpg','japan-5.jpg'];
+var japanPhotos = ['japan-1.jpg','japan-2.jpg','japan-3.jpg','japan-4.jpg'];
 var japanIdx = 0;
 function japanCarouselInit(){
   var dots = document.getElementById('japanCarouselDots');
