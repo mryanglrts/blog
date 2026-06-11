@@ -411,6 +411,8 @@ function blogRenderEntries(entries){
   var feed  = document.getElementById('blogFeed');
   var empty = document.getElementById('blogEmpty');
   feed.innerHTML='';
+  var countEl = document.getElementById('blogCount');
+  if(countEl) countEl.textContent = entries.length ? 'there\'s a total of ' + entries.length + ' blog' + (entries.length === 1 ? '' : 's') + ' so far.' : '';
   if(!entries.length){ empty.style.display='block'; return; }
   empty.style.display='none';
   var rev = entries.slice().reverse();
